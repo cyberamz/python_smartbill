@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
      name='smartbill',
-     version='0.2',
+     version='0.2.1',
      author='CyberAmz.com',
      author_email='office@cyberamz.com',
      classifiers=[
