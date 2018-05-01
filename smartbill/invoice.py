@@ -40,8 +40,27 @@ class InvoiceSmartBill(object):
                 product.update({'warehouseName':ware_house_name})
         return product
 
-    def create_invoice(self, client, products, issue_date, series_number=None, is_draft=False, due_date=None,
-                       delivery_date=None):
+    def create_partial_payment(self, value, payment_series=None, type='Alta incasare', is_cash=False):
+        return {'value': value,
+                'paymentSeries': payment_series,
+                'type': type,
+                'isCash':is_cash}
+
+    def create_all_payment(self, products, *args, **kwargs):
+        value_all = 0
+
+        for product in products:
+            if product['isTaxIncluded']:
+                value_all += product['quantity'] * product['price']
+            else:
+                value_all += product['quantity'] * product['price'] * float(product['taxPercentage'] + 100)/100
+        return self.create_partial_payment(value_all, **kwargs)
+
+    def create_invoice(self, client, products, issue_date, currency=None, series_number=None, is_draft=False,
+                       due_date=None, delivery_date=None, payment=None):
+
+        if not currency:
+            currency = self.currency
 
         if not series_number:
             series_number = self.get_series()['list'][0]['name']
@@ -50,12 +69,42 @@ class InvoiceSmartBill(object):
                 "client": client,
                 "issueDate": issue_date,
                 "seriesName": series_number,
+                'currency': currency,
                 "isDraft": is_draft,
                 "dueDate": due_date,
                 "deliveryDate": delivery_date,
                 "products": products,
                 'useStock': True,
+                'payment': payment,
               }
         data = json.dumps(data)
         response = requests.post(f"{self.base_url}/invoice", headers=self.headers, data=data)
+        return response.json()
+
+    def get_invoice(self, series, nr):
+        params = {'cif': self.smartbill_ciff,
+                  'seriesname': series,
+                  'number': nr}
+        response = requests.get(f"{self.base_url}/invoice/pdf", headers=self.headers, params=params)
+        return response
+
+    def get_invoice_paymentstatus(self, series, nr):
+        params = {'cif': self.smartbill_ciff,
+                  'seriesname': series,
+                  'number': nr}
+        response = requests.get(f"{self.base_url}/invoice/paymentstatus", headers=self.headers, params=params)
+        return response.json()
+
+    def cancel_invoice(self, series, nr):
+        params = {'cif': self.smartbill_ciff,
+                  'seriesname': series,
+                  'number': nr}
+        response = requests.put(f"{self.base_url}/invoice/cancel", headers=self.headers, params=params)
+        return response.json()
+
+    def restore_invoice(self, series, nr):
+        params = {'cif': self.smartbill_ciff,
+                  'seriesname': series,
+                  'number': nr}
+        response = requests.put(f"{self.base_url}/invoice/restore", headers=self.headers, params=params)
         return response.json()

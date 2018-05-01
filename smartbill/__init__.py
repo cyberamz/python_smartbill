@@ -1,9 +1,10 @@
 from .authenticate import AuthenticateMixin
 from .invoice import InvoiceSmartBill
+from .stock import StockSmartBill
 from .config import ConfigSmartBill
 
 
-class SmartBill(InvoiceSmartBill, AuthenticateMixin, ConfigSmartBill,):
+class SmartBill(InvoiceSmartBill, StockSmartBill, AuthenticateMixin, ConfigSmartBill,):
     base_url = 'https://ws.smartbill.ro:8183/SBORO/api'
 
     def __init__(self, smartbill_user, smartbill_token, smartbill_ciff,
