@@ -65,7 +65,7 @@ class SmartBillTest(TestCase):
                                                 is_tax_included=True, tax_name='Redusa', tax_percentage=9,
                                                 is_service=True)
         client = self.smartbill.create_client(name_client='test', country_client="Romania")
-        invoice = self.smartbill.create_invoice(client, [product, product2], issue_date="2018-05-01")
+        invoice = self.smartbill.create_invoice(client, [product, product2], use_stock=True, issue_date="2018-05-01")
         self.assertNotEqual(invoice['errorText'], '')
 
     def test_create_invoice_partial_payment(self):

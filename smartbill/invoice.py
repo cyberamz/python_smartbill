@@ -4,7 +4,11 @@ import requests
 class InvoiceSmartBill(object):
 
     def create_client(self, name_client, country_client, vat_code_client=None, is_tax_payer_client=None,
-                      address_client=None, city_client=None, email_client=None, save_to_db_client=False):
+                      address_client=None, city_client=None, email_client=None, save_to_db_client=None):
+
+        if save_to_db_client is None:
+            save_to_db_client = self.save_to_db
+
         return {"name": name_client,
                 "vatCode": vat_code_client,
                 "isTaxPayer": is_tax_payer_client,
@@ -17,9 +21,14 @@ class InvoiceSmartBill(object):
 
     def create_product(self, name_product, code, measuring_unit_name, quantify, price,
                        is_tax_included, tax_name, tax_percentage, is_service, currency=None, is_discount=False,
-                       save_to_db_product=False, use_stock=False, ware_house_name=None):
+                       save_to_db_product=None, use_stock=None, ware_house_name=None):
+        if use_stock is None:
+            use_stock = self.use_stock
 
-        if not currency:
+        if save_to_db_product is None:
+            save_to_db_product = self.save_to_db
+
+        if currency is None:
             currency = self.currency
 
         product = {"name": name_product,
@@ -57,12 +66,15 @@ class InvoiceSmartBill(object):
         return self.create_partial_payment(value_all, **kwargs)
 
     def create_invoice(self, client, products, issue_date, currency=None, series_number=None, is_draft=False,
-                       due_date=None, delivery_date=None, payment=None):
+                       due_date=None, delivery_date=None, use_stock=None, payment=None):
 
-        if not currency:
+        if use_stock is None:
+            use_stock = self.use_stock
+
+        if currency is None:
             currency = self.currency
 
-        if not series_number:
+        if series_number is None:
             series_number = self.get_series()['list'][0]['name']
 
         data = {"companyVatCode": self.smartbill_ciff,
@@ -74,7 +86,7 @@ class InvoiceSmartBill(object):
                 "dueDate": due_date,
                 "deliveryDate": delivery_date,
                 "products": products,
-                'useStock': True,
+                'useStock': use_stock,
                 'payment': payment,
               }
         data = json.dumps(data)
