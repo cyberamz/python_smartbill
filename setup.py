@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-     name='smartbill',
+     name='smartbill_sdk',
      version='0.2.4',
      author='CyberAmz.com',
      author_email='office@cyberamz.com',
