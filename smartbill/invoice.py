@@ -1,4 +1,5 @@
 import json
+import simplejson
 import requests
 
 class InvoiceSmartBill(object):
@@ -66,7 +67,7 @@ class InvoiceSmartBill(object):
         return self.create_partial_payment(value_all, **kwargs)
 
     def create_invoice(self, client, products, issue_date, currency=None, series_number=None, is_draft=False,
-                       due_date=None, delivery_date=None, use_stock=None, payment=None):
+                       due_date=None, delivery_date=None, use_stock=None, payment=None, **kwargs):
 
         if use_stock is None:
             use_stock = self.use_stock
@@ -89,7 +90,10 @@ class InvoiceSmartBill(object):
                 'useStock': use_stock,
                 'payment': payment,
               }
-        data = json.dumps(data)
+        print(data)
+        print(f"{self.base_url}/invoice")
+        data.update(kwargs)
+        data = simplejson.dumps(data)
         response = requests.post(f"{self.base_url}/invoice", headers=self.headers, data=data)
         return response.json()
 
